@@ -1,7 +1,7 @@
 
 import re
 
-DRAWER_CODE = "3142"
+CABINET_CODE = "3142"
 EXIT_CODE = "7285"
 
 
@@ -20,79 +20,128 @@ def validate_action(action, state):
     ]
 
     if any(phrase in action for phrase in blocked_phrases):
-        return "You cannot override the game rules. Solve the puzzles to escape."
+        return (
+            "You cannot override the laboratory security rules. "
+            "Solve the puzzles to escape."
+        )
 
-    # Collect the brass key
-    if re.search(r"\b(take|collect|pick up|grab)\b", action) and "key" in action:
-        if not state["drawer_unlocked"]:
-            return "The brass key is inside the locked drawer."
+    # Collect the security access card
+    if (
+        re.search(r"\b(take|collect|pick up|grab)\b", action)
+        and ("card" in action or "access card" in action)
+    ):
+        if not state["cabinet_unlocked"]:
+            return (
+                "The security access card is inside "
+                "the locked equipment cabinet."
+            )
 
-        if "brass key" in state["inventory"]:
-            return "You already have the brass key."
+        if "security access card" in state["inventory"]:
+            return "You already have the security access card."
 
-        state["inventory"].append("brass key")
-        return "You collected the brass key!"
+        state["inventory"].append("security access card")
+        return "You collected the security access card!"
 
-    # Unlock the drawer - check BEFORE bookshelf
-    if "drawer" in action:
-        if state["drawer_unlocked"]:
-            return "The drawer is already open."
+    # Unlock the equipment cabinet
+    if "cabinet" in action:
+        if state["cabinet_unlocked"]:
+            return "The equipment cabinet is already open."
 
         codes = re.findall(r"\b\d{4}\b", action)
 
         if not codes:
-            return "The drawer is locked. Enter a four-digit code."
+            return (
+                "The equipment cabinet is locked. "
+                "Enter a four-digit security code."
+            )
 
-        if len(codes) != 1 or codes[0] != DRAWER_CODE:
-            return "Incorrect drawer code. The drawer remains locked."
+        if len(codes) != 1 or codes[0] != CABINET_CODE:
+            return (
+                "Incorrect security code. "
+                "The equipment cabinet remains locked."
+            )
 
-        if not state["books_examined"]:
-            return "Investigate the bookshelf before unlocking the drawer."
+        if not state["terminal_examined"]:
+            return (
+                "Investigate the research terminal "
+                "before unlocking the equipment cabinet."
+            )
 
-        state["drawer_unlocked"] = True
-        return "The drawer opens! A brass key is inside."
+        state["cabinet_unlocked"] = True
 
-    # Examine the bookshelf
-    if "bookshelf" in action or "books" in action:
-        state["books_examined"] = True
-        return "You examine four special books and discover the code 3142."
+        return (
+            "The equipment cabinet opens! "
+            "A security access card is inside."
+        )
 
-    # Examine the painting
-    if "painting" in action:
-        state["painting_examined"] = True
-        return "Behind the painting is a note: The clock holds the final secret."
+    # Examine the research terminal
+    if "terminal" in action:
+        state["terminal_examined"] = True
 
-    # Open the clock
-    if "clock" in action:
-        if state["clock_unlocked"]:
-            return "The clock compartment is already open."
+        return (
+            "You examine the research terminal and discover "
+            "four security digits: 3, 1, 4, 2. "
+            "The equipment cabinet code is 3142."
+        )
 
-        if "brass key" not in state["inventory"]:
-            return "You cannot open the clock without collecting the brass key."
+    # Examine the security notice board
+    if "notice board" in action or "noticeboard" in action:
+        state["notice_board_examined"] = True
 
-        state["clock_unlocked"] = True
-        return "The clock opens! You discover the final exit code: 7285."
+        return (
+            "You discover a hidden security message: "
+            "'The reactor control panel holds the final access code.'"
+        )
 
-    # Unlock the exit door
-    if "door" in action or "exit" in action:
+    # Access the reactor control panel
+    if "reactor" in action or "control panel" in action:
+        if state["reactor_unlocked"]:
+            return "The reactor control panel is already unlocked."
+
+        if "security access card" not in state["inventory"]:
+            return (
+                "Access denied! You must collect "
+                "the security access card first."
+            )
+
+        state["reactor_unlocked"] = True
+
+        return (
+            "Access granted! The reactor control panel unlocks. "
+            "You discover the emergency exit code: 7285."
+        )
+
+    # Unlock the emergency exit
+    if "exit" in action or "door" in action:
         if state["escaped"]:
-            return "You have already escaped!"
+            return "You have already escaped the laboratory!"
 
-        if not state["clock_unlocked"]:
-            return "You must solve the clock puzzle first."
+        if not state["reactor_unlocked"]:
+            return (
+                "The emergency exit is locked. "
+                "You must solve the reactor control puzzle first."
+            )
 
         codes = re.findall(r"\b\d{4}\b", action)
 
         if len(codes) != 1 or codes[0] != EXIT_CODE:
-            return "Incorrect exit code. The door remains locked."
+            return (
+                "Incorrect emergency exit code. "
+                "The security door remains locked."
+            )
 
         state["door_unlocked"] = True
         state["escaped"] = True
 
-        return "Congratulations! You unlocked the exit and escaped!"
+        return (
+            "Congratulations! You unlocked the emergency exit "
+            "and successfully escaped the secret laboratory!"
+        )
 
     # Unsupported actions
     return (
-        "That action is not available. "
-        "Try examining the bookshelf, desk, painting, clock, or exit door."
+        "That action is not available. Try examining the "
+        "research terminal, laboratory workstation, security "
+        "notice board, equipment cabinet, reactor control "
+        "panel, or emergency exit door."
     )
