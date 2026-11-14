@@ -265,3 +265,16 @@ Version 1 provides flexible AI-driven storytelling but allows inconsistent game 
 Version 2 improves reliability by introducing Python-based state management and action validation.
 
 The project highlights the importance of testing, validation, and clear separation of responsibilities when developing AI-powered applications.
+## Application Screenshots
+
+### Version 1 — AI Escape Room
+![Version 1 Gameplay](Screenshots/one.png)
+
+### Version 2 — Improved AI Escape Room
+![Version 2 Gameplay](Screenshots/two.png)
+
+### Version 2 — Action Validation
+![Action Validation](Screenshots/three.png)
+
+### Automated Test Results
+![Test Results](Screenshots/four.png)
