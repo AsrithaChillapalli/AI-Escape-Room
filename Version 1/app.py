@@ -4,16 +4,23 @@ import streamlit as st
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-
+from pathlib import Path
 load_dotenv()
 
 st.set_page_config(
     page_title="Secret Laboratory Escape",
     page_icon="🧪"
 )
+# Load custom laboratory styling
+css_path = Path(__file__).resolve().parent.parent / "style.css"
 
+if css_path.exists():
+    st.markdown(
+        f"<style>{css_path.read_text(encoding='utf-8')}</style>",
+        unsafe_allow_html=True
+    )
 st.title("🧪 Secret Laboratory Escape")
-st.subheader("An AI-Powered Escape Room Adventure")
+st.subheader(" Escape Protocol — Version 1")
 
 st.write("""
 You wake up inside a secret underground research laboratory.
